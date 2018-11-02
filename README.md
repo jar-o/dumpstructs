@@ -1,5 +1,20 @@
 # dumpstructs
-Utility to dump the structs from Golang sources into a unified view
+Utility to dump the structs from Golang sources into a unified view.
+
+Effectively: `dumpstructs` will traverse a path and find all the `.go` files
+under that path and extract and print all the structs to your screen, with a
+reference to the file to which they belong.
+
+This is mainly a tool for grokking Go source code.
+
+# Install
+
+Just do
+
+```
+go get -u github.com/jar-o/dumpstructs
+go install github.com/jar-o/dumpstructs
+```
 
 # Usage
 

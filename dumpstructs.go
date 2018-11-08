@@ -122,12 +122,12 @@ func dumpStructs(fset *token.FileSet, file string) {
 	})
 }
 
-func dump(userpath string, exclude string) {
+func findAndDump(userpath string, exclude string) {
 	fset := token.NewFileSet()
 	var err error
 	err = filepath.Walk(userpath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
+			fmt.Printf("Error accessing path %q: %v\n", path, err)
 			return err
 		}
 
@@ -137,6 +137,7 @@ func dump(userpath string, exclude string) {
 				return nil
 			}
 		}
+
 		if strings.HasSuffix(path, ".go") {
 			dumpStructs(fset, path)
 		}
@@ -197,7 +198,7 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) error {
-		dump(c.String("path"), c.String("exclude"))
+		findAndDump(c.String("path"), c.String("exclude"))
 		return nil
 	}
 	err := app.Run(os.Args)

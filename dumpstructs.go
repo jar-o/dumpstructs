@@ -52,16 +52,34 @@ func handleFieldTypes(r string, typ ast.Expr) string {
 		r += ")"
 		return r
 	case *ast.MapType:
-		return handleFieldTypes(r+fmt.Sprintf("map[%s]", typ.(*ast.MapType).Key), typ.(*ast.MapType).Value)
+		return handleFieldTypes(r+fmt.Sprintf("map[%s]", handleFieldTypes("", typ.(*ast.MapType).Key)), typ.(*ast.MapType).Value)
 	case *ast.ArrayType:
 		return handleFieldTypes(r+"[]", typ.(*ast.ArrayType).Elt)
+	case *ast.StructType:
+		r += "struct {"
+		fl := genFieldList(typ.(*ast.StructType).Fields.List)
+		if len(fl) == 0 {
+			return r + "}"
+		}
+		r += "\n"
+		for _, field := range fl {
+			r += "\t\t" + fmt.Sprintf("%s %s %s %s",
+				field.Names, field.Types, field.Tags, field.Comments) + "\n"
+		}
+		r += "\t}"
+		return r
 	case *ast.InterfaceType:
 		return r + "interface{}"
+	case *ast.ChanType:
+		return handleFieldTypes(r+"chan ", typ.(*ast.ChanType).Value)
+	case *ast.Ellipsis:
+		return handleFieldTypes(r+"...", typ.(*ast.Ellipsis).Elt)
 	case *ast.SelectorExpr:
 		return r + fmt.Sprintf("%s", typ.(*ast.SelectorExpr).X) + "." + typ.(*ast.SelectorExpr).Sel.Name
 	case *ast.StarExpr:
 		return handleFieldTypes(r+"*", typ.(*ast.StarExpr).X)
 	case ast.Expr:
+		// NOTE(jamesr) '&{% ...' is output if complex type finds its way here
 		return r + fmt.Sprintf("%s", typ)
 	default:
 		return "TODO"
